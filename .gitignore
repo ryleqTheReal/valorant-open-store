@@ -1,0 +1,18 @@
+# rust
+/src-tauri/target/
+
+# frontend
+node_modules/
+dist/
+
+# env
+.env
+
+# graphify
+graphify-out/
+
+# claude
+.claude
+CLAUDE.md 
+plans
+docs

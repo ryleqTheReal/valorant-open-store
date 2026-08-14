@@ -1,0 +1,152 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# never run two releases at once and do not cancel one mid-flight
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+
+  # ======= START VERSION =======
+
+  version:
+    name: compute version
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.bump.outputs.tag }}
+      changelog: ${{ steps.bump.outputs.changelog }}
+      skip: ${{ steps.bump.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute version and changelog
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          latest=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1 || true)
+
+          if [ -z "$latest" ]; then
+            new="v1.0.0"
+            range=""
+          else
+            ver=${latest#v}
+            IFS=. read -r MAJOR MINOR PATCH <<<"$ver"
+            msgs=$(git log "$latest"..HEAD --pretty=format:%B)
+            if printf '%s' "$msgs" | grep -qiE '#major'; then
+              MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
+            elif printf '%s' "$msgs" | grep -qiE '#minor'; then
+              MINOR=$((MINOR + 1)); PATCH=0
+            else
+              PATCH=$((PATCH + 1))
+            fi
+            new="v${MAJOR}.${MINOR}.${PATCH}"
+            range="$latest..HEAD"
+          fi
+
+          if [ -n "$range" ]; then
+            changelog=$(git log "$range" --no-merges --pretty=format:'- %s')
+          else
+            changelog=$(git log --no-merges --pretty=format:'- %s')
+          fi
+
+          if [ -z "$changelog" ]; then
+            echo "no new commits since $latest, nothing to release"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "tag=$new" >> "$GITHUB_OUTPUT"
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          {
+            echo "changelog<<EOF"
+            echo "$changelog"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  # ======= END VERSION =======
+
+  # ======= START CHECK =======
+
+  check:
+    name: fmt · clippy · build · test
+    needs: version
+    if: needs.version.outputs.skip != 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: rustc --version && cargo --version
+
+      - name: Cache cargo & target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Format
+        working-directory: src-tauri
+        run: cargo fmt --all --check
+
+      - name: Clippy
+        working-directory: src-tauri
+        run: cargo clippy --all-targets --all-features
+
+      - name: Build
+        working-directory: src-tauri
+        run: cargo build --all-targets
+
+      - name: Test
+        working-directory: src-tauri
+        run: cargo test --all-features
+
+  # ======= END CHECK =======
+
+  # ======= START RELEASE =======
+
+  release:
+    name: Windows installer · GitHub release
+    needs: [version, check]
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache cargo & target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install frontend deps
+        run: npm ci
+
+      - name: Build and release
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          tagName: ${{ needs.version.outputs.tag }}
+          releaseName: ${{ needs.version.outputs.tag }}
+          releaseBody: ${{ needs.version.outputs.changelog }}
+          releaseDraft: false
+          prerelease: false
+
+  # ======= END RELEASE =======
