@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.png" alt="valorant-watcher" width="100%">
+  <img src="banner.png" alt="valorant-open-store" width="100%">
 </p>
 
 <p align="center">
