@@ -1,21 +1,528 @@
-/* ======= START STYLES ======= */
+/* ======= START RESET ======= */
 
-:root {
-  font-family: system-ui, sans-serif;
-  font-size: 16px;
-  color: #f1f5f9;
-  background-color: #0f172a;
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
+/* ======= END RESET ======= */
+
+/* ======= START BASE ======= */
+
+html, body {
+    height: 100%;
+    background: #171717;
+    color: #f0f0f0;
+    font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
 }
 
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 2rem;
+#app {
+    height: 100%;
 }
 
-/* ======= END STYLES ======= */
+body::after {
+    content: '';
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 260px;
+    background: radial-gradient(ellipse 160% 100% at 50% 100%, rgba(0, 0, 0, 0.92) 0%, transparent 72%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ======= END BASE ======= */
+
+/* ======= START STEP INDICATOR ======= */
+
+.step-indicator {
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+}
+
+button.step {
+    cursor: pointer;
+}
+
+button.step:hover .step-dot {
+    background: rgba(246, 30, 81, 0.3);
+}
+
+button.step:hover .step-label {
+    color: #f61e51;
+}
+
+.step-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: #242424;
+    color: #555;
+}
+
+.step-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #555;
+}
+
+.step-active .step-dot {
+    background: #f61e51;
+    color: #fff;
+}
+
+.step-active .step-label {
+    color: #f0f0f0;
+}
+
+.step-done .step-dot {
+    background: rgba(246, 30, 81, 0.15);
+    color: #f61e51;
+}
+
+/* ======= END STEP INDICATOR ======= */
+
+/* ======= START LOGIN ======= */
+
+.screen-login {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-title {
+    position: absolute;
+    top: 14%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f0f0f0;
+    line-height: 1.35;
+    text-align: center;
+}
+
+#btn-login {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    transition: all 300ms ease-in-out;
+    cursor: pointer;
+    background-color: #3B82F6;
+}
+
+#btn-login.hovered {
+    background-color: #2563EB;
+}
+
+#btn-login:focus {
+    outline: none;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1),
+                0 0 0 2px #171717, 0 0 0 4px #3B82F6;
+}
+
+#btn-login svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
+/* ======= END LOGIN ======= */
+
+/* ======= START ACCOUNTS ======= */
+
+.screen-accounts {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.discord-avatar {
+    position: absolute;
+    top: 5%;
+    right: 5%;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+.accounts-box {
+    width: 380px;
+    min-height: 360px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.accounts-box-header {
+    display: flex;
+    justify-content: flex-end;
+    padding: 12px 12px 0 12px;
+}
+
+.accounts-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    flex: 1;
+}
+
+.account-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: #242424;
+    border-radius: 8px;
+}
+
+.account-label {
+    font-size: 0.875rem;
+    color: #f0f0f0;
+    font-weight: 500;
+}
+
+.btn-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.btn-remove svg {
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-remove:hover svg {
+    transform: scale(1.25);
+    opacity: 0.75;
+}
+
+.accounts-empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #444;
+}
+
+/* ======= START MODAL ======= */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal {
+    position: relative;
+    background: #1a1a1a;
+    border-radius: 12px;
+    width: 320px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    padding: 4px;
+    color: #555;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease;
+}
+
+.modal-close:hover {
+    color: #888;
+}
+
+.modal-text {
+    text-align: center;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 28px 0 24px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-cancel {
+    padding: 10px 24px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.btn-cancel:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-logout {
+    padding: 10px 24px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ======= END MODAL ======= */
+
+/* ======= START BTN-ACTION COMPONENT ======= */
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 10px;
+    background: #f61e51;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.17s ease;
+}
+
+.btn-action:hover {
+    background: #d9184a;
+}
+
+#btn-add {
+    width: 36px;
+    height: 36px;
+}
+
+.btn-finish {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    padding: 10px 24px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ======= END BTN-ACTION COMPONENT ======= */
+
+/* ======= END ACCOUNTS ======= */
+
+/* ======= START UNINSTALL ======= */
+
+.screen-uninstall {
+    position: relative;
+    z-index: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 14%;
+    gap: 24px;
+}
+
+.uninstall-hero {
+    max-width: 600px;
+    text-align: center;
+}
+
+.uninstall-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #f0f0f0;
+    line-height: 1.35;
+}
+
+.uninstall-qa {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 774px;
+    max-height: 320px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+}
+
+.uninstall-qa::-webkit-scrollbar {
+    width: 6px;
+}
+
+.uninstall-qa::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.uninstall-qa::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+.uninstall-qa::-webkit-scrollbar-thumb:hover {
+    background: #f61e51;
+}
+
+.qa-item {
+    background: #242424;
+    border-radius: 8px;
+}
+
+.qa-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #f0f0f0;
+    text-align: left;
+    cursor: pointer;
+}
+
+.qa-question svg {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: #555;
+    transition: transform 0.15s ease;
+}
+
+.qa-item.open .qa-question svg {
+    transform: rotate(180deg);
+}
+
+.qa-body {
+    display: none;
+    padding: 0 14px 12px;
+}
+
+.qa-item.open .qa-body {
+    display: block;
+}
+
+.qa-answer {
+    font-size: 0.8rem;
+    color: #888;
+    line-height: 1.55;
+}
+
+.uninstall-link {
+    color: #3B82F6;
+    text-decoration: none;
+}
+
+.uninstall-link:hover {
+    text-decoration: underline;
+}
+
+.qa-commands {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.qa-command {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+.qa-command code {
+    flex-shrink: 0;
+    min-width: 260px;
+    padding: 3px 8px;
+    background: #242424;
+    border-radius: 6px;
+    font-family: 'Cascadia Code', Consolas, monospace;
+    font-size: 0.7rem;
+    color: #f0f0f0;
+}
+
+.qa-command span {
+    color: #888;
+}
+
+.qa-note {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #555;
+}
+
+.btn-back {
+    position: absolute;
+    bottom: 5%;
+    left: 5%;
+    padding: 10px 24px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* ======= END UNINSTALL ======= */

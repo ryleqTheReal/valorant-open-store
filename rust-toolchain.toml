@@ -1,5 +1,4 @@
-# pin the toolchain so local builds and ci stay in lockstep
 [toolchain]
 channel = "1.87"
-components = ["rustfmt", "clippy"]
+components = ["rustfmt", "clippy", "rust-analyzer"]
 profile = "minimal"
