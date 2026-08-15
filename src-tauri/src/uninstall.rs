@@ -97,9 +97,9 @@ mod tests {
         let _guard = REGISTRY_LOCK.lock().unwrap_or_else(|e| e.into_inner());
 
         let hkcu = RegKey::predef(HKEY_CURRENT_USER);
-        let uninstall_key = hkcu
-            .open_subkey_with_flags(UNINSTALL_BASE, KEY_ALL_ACCESS)
-            .expect("uninstall base key must exist and be writable under HKCU");
+        let (uninstall_key, _) = hkcu
+            .create_subkey_with_flags(UNINSTALL_BASE, KEY_ALL_ACCESS)
+            .expect("uninstall base key must be creatable and writable under HKCU");
 
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&uninstall_key)));
         let _ = uninstall_key.delete_subkey_all(name);
