@@ -3,7 +3,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/ryleqTheReal/valorant-open-store/releases/latest"><img src="https://img.shields.io/github/v/release/ryleqTheReal/valorant-open-store?style=flat-square&color=FF4C5A&label=latest" alt="latest release"></a>
   <img src="https://img.shields.io/badge/platform-Windows-2d2d2d?style=flat-square" alt="platform">
   <img src="https://img.shields.io/badge/built%20with-Rust-CE412B?style=flat-square&logo=rust&logoColor=white" alt="built with Rust">
   <a href="https://store.valstats.site"><img src="https://img.shields.io/badge/dashboard-store.valstats.site-FF4C5A?style=flat-square" alt="store.valstats.site"></a>
