@@ -29,45 +29,43 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compute version and changelog
+      # version is decided by deploy.ps1, not by CI - it bumps package.json,
+      # src-tauri/Cargo.toml, src-tauri/Cargo.lock and src-tauri/tauri.conf.json
+      # together before pushing to main. This step only reads package.json as
+      # the source of truth and verifies the other three agree with it.
+      - name: Read and verify version
         id: bump
         shell: bash
         run: |
           set -euo pipefail
 
-          latest=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1 || true)
+          pkg_version=$(jq -r '.version' package.json)
+          cargo_version=$(grep -m1 '^version = ' src-tauri/Cargo.toml | sed -E 's/version = "(.*)"/\1/')
+          lock_version=$(awk '/^name = "open-store"$/{getline; print; exit}' src-tauri/Cargo.lock | sed -E 's/version = "(.*)"/\1/')
+          conf_version=$(jq -r '.version' src-tauri/tauri.conf.json)
 
-          if [ -z "$latest" ]; then
-            new="v1.0.0"
-            range=""
-          else
-            ver=${latest#v}
-            IFS=. read -r MAJOR MINOR PATCH <<<"$ver"
-            msgs=$(git log "$latest"..HEAD --pretty=format:%B)
-            if printf '%s' "$msgs" | grep -qiE '#major'; then
-              MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0
-            elif printf '%s' "$msgs" | grep -qiE '#minor'; then
-              MINOR=$((MINOR + 1)); PATCH=0
-            else
-              PATCH=$((PATCH + 1))
-            fi
-            new="v${MAJOR}.${MINOR}.${PATCH}"
-            range="$latest..HEAD"
+          if [ "$pkg_version" != "$cargo_version" ] || [ "$pkg_version" != "$lock_version" ] || [ "$pkg_version" != "$conf_version" ]; then
+            echo "version mismatch: package.json=$pkg_version Cargo.toml=$cargo_version Cargo.lock=$lock_version tauri.conf.json=$conf_version"
+            echo "run deploy.ps1 so all four files are bumped together"
+            exit 1
           fi
 
-          if [ -n "$range" ]; then
-            changelog=$(git log "$range" --no-merges --pretty=format:'- %s')
-          else
-            changelog=$(git log --no-merges --pretty=format:'- %s')
-          fi
+          tag="v${pkg_version}"
 
-          if [ -z "$changelog" ]; then
-            echo "no new commits since $latest, nothing to release"
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "tag $tag already exists, nothing to release"
             echo "skip=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          echo "tag=$new" >> "$GITHUB_OUTPUT"
+          latest=$(git tag -l 'v*.*.*' --sort=-v:refname | head -n1 || true)
+          if [ -n "$latest" ]; then
+            changelog=$(git log "$latest"..HEAD --no-merges --pretty=format:'- %s')
+          else
+            changelog=$(git log --no-merges --pretty=format:'- %s')
+          fi
+
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "skip=false" >> "$GITHUB_OUTPUT"
           {
             echo "changelog<<EOF"
